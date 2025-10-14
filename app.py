@@ -33,8 +33,7 @@ def contacts():
 def resetdb():
     """
     Delete the SQLite database file (if present), rebuild the schema,
-    insert example data, run a few test queries and write their results
-    to DEBUG_PATH (debug.txt), then redirect to home.
+    then insert demo data and redirect to home.
     """
     # remove existing database file
     if os.path.exists(DB_PATH):
@@ -88,112 +87,100 @@ def resetdb():
         );
         """)
 
-        # Insert example rows
-        cur.execute("INSERT INTO Instrumentation (name) VALUES (?);", ("Solo Flute",))
-        cur.execute("INSERT INTO Instrumentation (name) VALUES (?);", ("String Quartet",))
-        cur.execute("INSERT INTO Instrument (name) VALUES (?);", ("Flute",))
-        cur.execute("INSERT INTO Instrument (name) VALUES (?);", ("Violin",))
-        cur.execute("INSERT INTO Instrument (name) VALUES (?);", ("Viola",))
-        cur.execute("INSERT INTO Instrument (name) VALUES (?);", ("Cello",))
-
-        # link instruments to instrumentations
-        cur.execute("INSERT INTO HasInstrument (instrumentation_id, instrument_id, instrument_count) VALUES (?, ?, ?);", (1, 1, 1))
-        cur.execute("INSERT INTO HasInstrument (instrumentation_id, instrument_id, instrument_count) VALUES (?, ?, ?);", (2, 2, 2))
-        cur.execute("INSERT INTO HasInstrument (instrumentation_id, instrument_id, instrument_count) VALUES (?, ?, ?);", (2, 3, 1))
-        cur.execute("INSERT INTO HasInstrument (instrumentation_id, instrument_id, instrument_count) VALUES (?, ?, ?);", (2, 4, 1))
-
-        # example pieces using allowed difficulty_rating values; use None for NULL
-        cur.execute(
-            "INSERT INTO Piece (name, instrumentation, duration_seconds, year_of_composition, difficulty_rating) VALUES (?, ?, ?, ?, ?);",
-            ("Meditation for Flute", 1, 210, 2018, 3.5)
-        )
-        cur.execute(
-            "INSERT INTO Piece (name, instrumentation, duration_seconds, year_of_composition, difficulty_rating) VALUES (?, ?, ?, ?, ?);",
-            ("Quartet in A", 2, 1260, 1799, 4)
-        )
-        cur.execute(
-            "INSERT INTO Piece (name, instrumentation, duration_seconds, year_of_composition, difficulty_rating) VALUES (?, ?, ?, ?, ?);",
-            ("Beginner Etude", 1, 90, 2021, 0.5)
-        )
-        cur.execute(
-            "INSERT INTO Piece (name, instrumentation, duration_seconds, year_of_composition, difficulty_rating) VALUES (?, ?, ?, ?, ?);",
-            ("Advanced Sonata", None, 1800, 2005, 6)
-        )
-
         conn.commit()
-
-        # Run test queries and write results to debug.txt
-        with open(DEBUG_PATH, "w", encoding="utf-8") as dbg:
-            # 1) Count pieces
-            cur.execute("SELECT COUNT(*) AS cnt FROM Piece;")
-            row = cur.fetchone()
-            dbg.write(f"Total pieces: {row['cnt']}\n")
-
-            # 2) List piece names with instrumentation name (NULL becomes 'None')
-            cur.execute("""
-                SELECT p.name AS piece, i.name AS instrumentation
-                FROM Piece p
-                LEFT JOIN Instrumentation i ON p.instrumentation = i.id
-                ORDER BY p.id;
-            """)
-            dbg.write("\nPieces and instrumentations:\n")
-            for r in cur.fetchall():
-                instr = r["instrumentation"] if r["instrumentation"] is not None else "NULL"
-                dbg.write(f"- {r['piece']}  |  {instr}\n")
-
-            # 3) Aggregate instruments per instrumentation
-            cur.execute("""
-                SELECT ins.name AS instrumentation, COUNT(h.instrument_id) AS distinct_instruments, SUM(h.instrument_count) AS total_count
-                FROM Instrumentation ins
-                LEFT JOIN HasInstrument h ON ins.id = h.instrumentation_id
-                GROUP BY ins.id
-                ORDER BY ins.id;
-            """)
-            dbg.write("\nInstrumentation instrument counts:\n")
-            for r in cur.fetchall():
-                dbg.write(f"- {r['instrumentation']}  |  distinct_instruments={r['distinct_instruments']}  total_count={r['total_count']}\n")
-
-            # 4) Pieces by difficulty rating (ordered)
-            cur.execute("""
-                SELECT difficulty_rating, COUNT(*) AS cnt
-                FROM Piece
-                GROUP BY difficulty_rating
-                ORDER BY difficulty_rating;
-            """)
-            dbg.write("\nPieces by difficulty_rating:\n")
-            for r in cur.fetchall():
-                dbg.write(f"- difficulty={r['difficulty_rating']}  count={r['cnt']}\n")
-
-            # 5) Example join: instruments used by 'String Quartet'
-            cur.execute("""
-                SELECT insr.name AS instrument, h.instrument_count
-                FROM Instrumentation ins
-                JOIN HasInstrument h ON ins.id = h.instrumentation_id
-                JOIN Instrument insr ON h.instrument_id = insr.id
-                WHERE ins.name = ?;
-            """, ("String Quartet",))
-            dbg.write("\nInstruments for String Quartet:\n")
-            rows = cur.fetchall()
-            if not rows:
-                dbg.write("- (none)\n")
-            else:
-                for r in rows:
-                    dbg.write(f"- {r['instrument']}  |  count={r['instrument_count']}\n")
-
         conn.close()
     except Exception as e:
         return f"Failed to (re)build database schema: {e}", 500
 
-    # Reads file and passes contents to template
-    content = ""
-    if os.path.exists(DEBUG_PATH):
-        try:
-            with open(DEBUG_PATH, "r", encoding="utf-8") as f:
-                content = f.read()
-        except OSError:
-            content = "Failed to read debug file."
+    # Some inserts to test stuff out!
+    add_instrument("Flute")
+    add_instrument("Violin")
+    add_instrument("Viola")
+    add_instrument("Cello")
 
-    return render_template("index.html", current_year=datetime.now().year, debug_info=content)
+    add_instrumentation("Solo Flute", [("Flute", 1)])
+    add_instrumentation("String Quartet", [("Violin", 2), ("Viola", 1), ("Cello", 1)])
+
+    add_piece("Meditation for Flute", "Solo Flute", 210, 2018, 3.5)
+    add_piece("Quartet in A", "String Quartet", 1260, 1799, 4)
+    add_piece("Beginner Etude", "Solo Flute", 90, 2021, 0.5)
+    add_piece("Advanced Sonata", None, 1800, 2005, 6)
+
+    return redirect(url_for("home"))
+
+# Adds an instrument entry.
+def add_instrument(name):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO Instrument (name) VALUES (?);", (name,))
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    except Exception as e:
+        print(f"Error adding instrument: {e}")
+        return False
+
+# Adds an instrumentation entry. Also does the association.
+# 'instruments' is a list of tuples (instrument_name, instrument_count)
+def add_instrumentation(name, instruments):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO Instrumentation (name) VALUES (?);", (name,))
+        instrumentation_id = cur.lastrowid
+
+        for instrument_name, instrument_count in instruments:
+            cur.execute("SELECT id FROM Instrument WHERE name = ?;", (instrument_name,))
+            row = cur.fetchone()
+            if row:
+                instrument_id = row["id"]
+                cur.execute("""
+                    INSERT INTO HasInstrument (instrumentation_id, instrument_id, instrument_count)
+                    VALUES (?, ?, ?);
+                """, (instrumentation_id, instrument_id, instrument_count))
+            else:
+                print(f"Instrument '{instrument_name}' not found. Skipping association.")
+
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    except Exception as e:
+        print(f"Error adding instrumentation: {e}")
+        return False
+
+# Adds a new piece. Does all needed associations.
+def add_piece(name, instrumentation_name, duration_seconds, year_of_composition, difficulty_rating):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        instrumentation_id = None
+        if instrumentation_name:
+            cur.execute("SELECT id FROM Instrumentation WHERE name = ?;", (instrumentation_name,))
+            row = cur.fetchone()
+            if row:
+                instrumentation_id = row["id"]
+            else:
+                print(f"Instrumentation '{instrumentation_name}' not found. Setting to NULL.")
+
+        cur.execute("""
+            INSERT INTO Piece (name, instrumentation, duration_seconds, year_of_composition, difficulty_rating)
+            VALUES (?, ?, ?, ?, ?);
+        """, (name, instrumentation_id, duration_seconds, year_of_composition, difficulty_rating))
+
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    except Exception as e:
+        print(f"Error adding piece: {e}")
+        return False
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
