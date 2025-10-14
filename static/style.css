@@ -1,0 +1,57 @@
+/* Classical Composer Dark Mode Theme */
+
+body {
+  background-color: #1a1a1a;
+  color: #e0d8c3;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  margin: 0;
+  padding: 2em;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  color: #f0e6b2;
+  font-weight: normal;
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.3em;
+  margin-top: 1.5em;
+}
+
+a {
+  color: #c2b280;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+nav {
+  background-color: #2a2a2a;
+  padding: 1em;
+  border-bottom: 1px solid #444;
+}
+
+nav a {
+  margin-right: 1em;
+  color: #f0e6b2;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  background-color: #222;
+  padding: 2em;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #000;
+}
+
+footer {
+  text-align: center;
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 3em;
+  border-top: 1px solid #444;
+  padding-top: 1em;
+}
