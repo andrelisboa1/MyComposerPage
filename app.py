@@ -11,6 +11,14 @@ def home():
 def about():
     return render_template("about.html", current_year=datetime.now().year)
 
+@app.route("/works")
+def works():
+    return render_template("index.html", current_year=datetime.now().year)
+
+@app.route("/contacts")
+def contacts():
+    return render_template("index.html", current_year=datetime.now().year)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
 
