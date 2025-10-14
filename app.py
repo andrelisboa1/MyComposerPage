@@ -8,3 +8,5 @@ def home():
 
 if __name__ == "__main__":
     app.run()
+
+# Old command: gunicorn your_application.wsgi
