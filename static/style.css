@@ -61,6 +61,7 @@ ul, ol {
   padding-left: 2em;
   font-size: 1.05em;
   color: #e0d8c3;
+  list-style-type: none;
 }
 
 ul li, ol li {
