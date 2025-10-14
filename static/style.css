@@ -55,3 +55,34 @@ footer {
   border-top: 1px solid #444;
   padding-top: 1em;
 }
+
+ul, ol {
+  margin: 1.5em 0;
+  padding-left: 2em;
+  font-size: 1.05em;
+  color: #e0d8c3;
+}
+
+ul li, ol li {
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 0.5em;
+}
+
+ul li::before {
+  content: "♪";
+  position: absolute;
+  left: -1.5em;
+  color: #c2b280;
+  font-size: 1em;
+}
+
+ol {
+  list-style-type: upper-roman;
+}
+
+ol li::marker {
+  color: #f0e6b2;
+  font-weight: bold;
+}
