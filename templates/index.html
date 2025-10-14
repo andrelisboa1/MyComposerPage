@@ -4,4 +4,27 @@
 
 {% block content %}
   <h1>Welcome to my homepage!</h1>
+
+  <div id="debug-container" style="margin-top:1.5rem;">
+    <h2>Debug Output</h2>
+    <div id="debug-output" style="white-space:pre-wrap;font-family:monospace;background:#f7f7f7;border:1px solid #e0e0e0;padding:1rem;border-radius:6px;min-height:6rem;">
+      Loading debug output...
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      fetch('/debug.txt')
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('no debug file');
+          return resp.text();
+        })
+        .then(function (text) {
+          document.getElementById('debug-output').textContent = text || '(debug file empty)';
+        })
+        .catch(function () {
+          document.getElementById('debug-output').textContent = '(no debug output available)';
+        });
+    })();
+  </script>
 {% endblock %}
