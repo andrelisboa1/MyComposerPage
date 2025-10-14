@@ -184,7 +184,16 @@ def resetdb():
     except Exception as e:
         return f"Failed to (re)build database schema: {e}", 500
 
-    return redirect(url_for("home"))
+    # Reads file and passes contents to template
+    content = ""
+    if os.path.exists(DEBUG_PATH):
+        try:
+            with open(DEBUG_PATH, "r", encoding="utf-8") as f:
+                content = f.read()
+        except OSError:
+            content = "Failed to read debug file."
+
+    return render_template("index.html", current_year=datetime.now().year, debug_info=content)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
