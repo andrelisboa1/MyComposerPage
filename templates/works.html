@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %} My Works {% endblock %}
+
+{% block content %}
+<h1> My Compositions </h1>
+<div> Here is a list of every composition of mine to date:</div>
+
+{% if compositions %}
+<ul class="compositions-list">
+	{% for c in compositions %}
+		<li class="composition">
+			<strong>{{ c.name }}</strong>
+            {% if c.year_of_composition %} 
+            	<span class="year">({{ c.year_of_composition }})</span>
+            {% endif %}
+			{% if c.difficulty_rating %}
+				<div class="description">{{ c.difficulty_rating }}</div>
+			{% endif %}
+		</li>
+	{% endfor %}
+</ul>
+{% else %}
+<p>No compositions yet.</p>
+{% endif %}
+
+{% endblock %}

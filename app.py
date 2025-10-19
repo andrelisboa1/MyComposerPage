@@ -23,7 +23,7 @@ def about():
 
 @app.route("/works")
 def works():
-    return render_template("index.html", current_year=datetime.now().year)
+    return render_template("works.html", current_year=datetime.now().year, pieces=get_piece_list())
 
 @app.route("/contacts")
 def contacts():
@@ -181,6 +181,21 @@ def add_piece(name, instrumentation_name, duration_seconds, year_of_composition,
     except Exception as e:
         print(f"Error adding piece: {e}")
         return False
+    
+def get_piece_list():
+	try:
+		conn = get_db_connection()
+        cur = conn.cursor()
+    	cur.execute("SELECT * FROM Piece;")
+    	pieces = cur.fetchall()
+    	con.close()
+    except Exception as e:
+		print(f"Error retrieving piece list: {e}")
+		return []
+	
+    return pieces
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
