@@ -189,8 +189,8 @@ def get_piece_list():
 		cur.execute("SELECT * FROM Piece;")
 		pieces = cur.fetchall()
 		conn.close()
-        return pieces
-    except Exception as e:
+		return pieces
+	except Exception as e:
 		print(f"Error retrieving piece list: {e}")
 		return []
 	
