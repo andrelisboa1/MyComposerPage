@@ -23,7 +23,7 @@ def about():
 
 @app.route("/works")
 def works():
-    return render_template("works.html", current_year=datetime.now().year, pieces=get_piece_list())
+    return render_template("works.html", current_year=datetime.now().year, compositions=get_piece_list())
 
 @app.route("/contacts")
 def contacts():
