@@ -183,19 +183,18 @@ def add_piece(name, instrumentation_name, duration_seconds, year_of_composition,
         return False
     
 def get_piece_list():
-	try:
-		conn = get_db_connection()
-		cur = conn.cursor()
-		cur.execute("SELECT * FROM Piece;")
-		pieces = cur.fetchall()
-		conn.close()
-		print("Retrieved pieces!")
-		return pieces
-	except Exception as e:
-		print(f"Error retrieving piece list: {e}")
-		return []
-	
-    
+    pieces = []
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Piece;")
+        pieces = cur.fetchall()
+        conn.close()
+        print("Retrieved pieces!")
+    except Exception as e:
+        print(f"Error retrieving piece list: {e}")
+
+    return pieces
 
 
 
