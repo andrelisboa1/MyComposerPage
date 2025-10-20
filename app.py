@@ -183,14 +183,29 @@ def add_piece(name, instrumentation_name, duration_seconds, year_of_composition,
         return False
     
 def get_piece_list():
+    """
+    Return a list of pieces as plain dicts suitable for templates.
+    If the database file or table does not exist, return an empty list
+    and log a helpful message.
+    """
     pieces = []
+    if not os.path.exists(DB_PATH):
+        print("get_piece_list: database file not found; returning empty list.")
+        return pieces
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM Piece;")
-        pieces = cur.fetchall()
+        cur.execute("SELECT name, year_of_composition, difficulty_rating FROM Piece ORDER BY id;")
+        rows = cur.fetchall()
+        for r in rows:
+            pieces.append({
+                "name": r["name"],
+                "year_of_composition": r["year_of_composition"],
+                "difficulty_rating": r["difficulty_rating"]
+            })
         conn.close()
-        print("Retrieved pieces!")
+        print(f"get_piece_list: retrieved {len(pieces)} pieces.")
     except Exception as e:
         print(f"Error retrieving piece list: {e}")
 
